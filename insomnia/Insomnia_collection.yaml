@@ -1,0 +1,803 @@
+type: collection.insomnia.rest/5.0
+schema_version: "5.1"
+name: Delivery Flow
+meta:
+  id: wrk_77befd6a3d3340d084ce32d0b107df0a
+  created: 1788626298301
+  modified: 1788626298301
+  description: ""
+collection:
+  - name: Auth
+    meta:
+      id: fld_43f46b32052c40c29afd6814d11979a6
+      created: 1788690379372
+      modified: 1788721032497
+      sortKey: -1788690128048
+      description: ""
+    children:
+      - name: register
+        meta:
+          id: fld_b3db76544e374716aba85e40ca95f873
+          created: 1788690127848
+          modified: 1788721032497
+          sortKey: -1788690385878
+          description: ""
+        children:
+          - url: "{{ _.base_url }}/api/auth/register"
+            name: Positive - Register
+            meta:
+              id: req_9a262668950f4e5293b39d59854db0dd
+              created: 1788709778659
+              modified: 1788720837572
+              isPrivate: false
+              description: ""
+              sortKey: -1788709778659
+            method: POST
+            body:
+              mimeType: application/json
+              text: |-
+                {
+                  "username": "{{ registerUsername }}",
+                  "password": "{{ _.password }}",
+                  "name": "Ekaterina",
+                  "email": "ekaterina-first@mail.ru",
+                  "role": "ROLE_CUSTOMER"
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+            scripts:
+              preRequest: >-
+                const registerUsername =
+                `user_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+
+                insomnia.environment.set('registerUsername', registerUsername);
+
+                insomnia.environment.set('username', registerUsername);
+
+
+                const registerPassword = `pass_${Math.floor(Math.random() *
+                1000000)}`;
+
+                insomnia.environment.set('password', registerPassword);
+              afterResponse: >-
+                insomnia.test('Статус код должен быть 201 (Created)', () => {
+                  insomnia.expect(insomnia.response.code).to.equal(201);
+                });
+
+
+                if (insomnia.response.body) {
+                  const responseBody = JSON.parse(insomnia.response.body);
+
+                  insomnia.test('Пользователь создан: есть id и username', () => {
+                    insomnia.expect(responseBody.id).to.be.a('number');
+                    insomnia.expect(responseBody.username).to.be.a('string');
+                    insomnia.expect(responseBody.roles).to.be.an('array');
+                  });
+                	
+                	if (insomnia.response.text().username) {
+                    insomnia.environment.set('username', insomnia.response.text().username);
+                  }
+
+                	
+                } else {
+                  insomnia.test('Тело ответа пустое', () => {
+                    insomnia.expect.fail('Response body отсутствует');
+                  });
+                }
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{ _.base_url }}/api/auth/register"
+            name: Negative - Register Existing User
+            meta:
+              id: req_1406f079640c49a1bf169ec78d1d0841
+              created: 1788719956713
+              modified: 1788720825219
+              isPrivate: false
+              description: ""
+              sortKey: -1788719956713
+            method: POST
+            body:
+              mimeType: application/json
+              text: |-
+                {
+                  "username": "{{ _.username }}",
+                  "password": "{{ _.password }}",
+                  "name": "Duplicate User",
+                  "email": "duplicate@mail.ru",
+                  "role": "ROLE_CUSTOMER"
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+            scripts:
+              afterResponse: >-
+                insomnia.test('Статус код должен быть 400 (Bad Request)', () =>
+                {
+                  insomnia.expect(insomnia.response.code).to.equal(400);
+                });
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{ _.base_url }}/api/auth/register"
+            name: Negative - Register Short Password
+            meta:
+              id: req_871b6da30ed44450bcc6023df0a3606f
+              created: 1788720808763
+              modified: 1788720954379
+              isPrivate: false
+              description: ""
+              sortKey: -1788720808763
+            method: POST
+            body:
+              mimeType: application/json
+              text: |-
+                {
+                  "username": "user_short_pass",
+                  "password": "123",
+                  "name": "Short",
+                  "email": "short@mail.ru",
+                  "role": "ROLE_CUSTOMER"
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+            scripts:
+              preRequest: >-
+                const registerUsername =
+                `user_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+
+                insomnia.environment.set('registerUsername', registerUsername);
+
+                insomnia.environment.set('username', registerUsername);
+              afterResponse: >-
+                insomnia.test('Статус код должен быть 400 (Bad Request)', () =>
+                {
+                  insomnia.expect(insomnia.response.code).to.equal(400);
+                });
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{ _.base_url }}/api/auth/register"
+            name: Negative - Register Long Password
+            meta:
+              id: req_0d29aa6d52dd4724a99ecbfd98502d70
+              created: 1788720913403
+              modified: 1788721030490
+              isPrivate: false
+              description: ""
+              sortKey: -1788720913403
+            method: POST
+            body:
+              mimeType: application/json
+              text: >-
+                {
+                  "username": "user_short_pass",
+                  "password": "123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123",
+                  "name": "Long",
+                  "email": "Long@mail.ru",
+                  "role": "ROLE_CUSTOMER"
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+            scripts:
+              preRequest: >-
+                const registerUsername =
+                `user_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+
+                insomnia.environment.set('registerUsername', registerUsername);
+
+                insomnia.environment.set('username', registerUsername);
+              afterResponse: >-
+                insomnia.test('Статус код должен быть 400 (Bad Request)', () =>
+                {
+                  insomnia.expect(insomnia.response.code).to.equal(400);
+                });
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+      - name: login
+        meta:
+          id: fld_38be1b669889419696f6608db98b7202
+          created: 1788690136912
+          modified: 1788719866671
+          sortKey: -1788690385778
+          description: ""
+        children:
+          - url: "{{ _.base_url }}/api/auth/login"
+            name: Positive - Login
+            meta:
+              id: req_2017a500272048509e25b18948a23011
+              created: 1788690674417
+              modified: 1788719550210
+              isPrivate: false
+              description: ""
+              sortKey: -1788690674417
+            method: POST
+            body:
+              mimeType: application/json
+              text: |-
+                {
+                  "username": "{{ _.username }}",
+                  "password": "{{ _.password }}"
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+            scripts:
+              afterResponse: |-
+                insomnia.test('Статус код должен быть 200 (OK)', () => {
+                  insomnia.expect(insomnia.response.code).to.equal(200);
+                });
+
+                if (insomnia.response.body) {
+                  const responseBody = JSON.parse(insomnia.response.body);
+
+                  insomnia.test('В ответе есть token', () => {
+                    insomnia.expect(responseBody.token).to.be.a('string');
+                  });
+
+                  if (responseBody.token) {
+                    insomnia.environment.set('token', responseBody.token);
+                  }
+                } else {
+                  insomnia.test('Тело ответа пустое', () => {
+                    insomnia.expect.fail('Response body отсутствует');
+                  });
+                }
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{ _.base_url }}/api/auth/login"
+            name: Negative - Non-existent User
+            meta:
+              id: req_80ab4b47d6bd47c381e32e77d1f77f3a
+              created: 1788709536229
+              modified: 1788719940344
+              isPrivate: false
+              description: ""
+              sortKey: -1788709536229
+            method: POST
+            body:
+              mimeType: application/json
+              text: |-
+                {
+                  "username": "{{ _.nonExistentUsername }}",
+                  "password": "{{ _.randomPassword }}"
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+            scripts:
+              preRequest: >-
+                const nonExistentUser =
+                `non_existent_${Date.now()}_${Math.floor(Math.random() *
+                10000)}`;
+
+                const randomPassword = `pass_${Math.floor(Math.random() *
+                1000000)}`;
+
+
+                insomnia.environment.set('nonExistentUsername',
+                nonExistentUser);
+
+                insomnia.environment.set('randomPassword', randomPassword);
+              afterResponse: >-
+                insomnia.test('Статус код должен быть 401 (Unauthorized)', () =>
+                {
+                  insomnia.expect(insomnia.response.code).to.equal(401);
+                });
+
+
+                if (insomnia.response.body) {
+                  const responseBody = JSON.parse(insomnia.response.body);
+
+                  insomnia.test('В ответе есть сообщение об ошибке', () => {
+                    insomnia.expect(responseBody.error).to.equal('Invalid username or password');
+                  });
+                }
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+  - name: Order
+    meta:
+      id: fld_715ff222cc5f41ca9e1e431dbf22782a
+      created: 1788690409821
+      modified: 1788721462330
+      sortKey: -1788690128148
+      description: ""
+    children:
+      - name: create order
+        meta:
+          id: fld_4049359f25ee4a0dbc2e46cc9b75f91f
+          created: 1788692634652
+          modified: 1788721346228
+          sortKey: -1788692634652
+          description: ""
+        children:
+          - url: "{{ _.base_url }}/api/orders"
+            name: Positive - Create order
+            meta:
+              id: req_8f51151dcfe943aca0d32fbd827b4aed
+              created: 1788692641894
+              modified: 1788720172445
+              isPrivate: false
+              description: ""
+              sortKey: -1788692641894
+            method: POST
+            body:
+              mimeType: application/json
+              text: |-
+                {
+                  "restaurantId": 1111,
+                  "deliveryAddress": "Lenina 1022, Moscow",
+                  "items": [
+                    {
+                      "menuItemId": 111,
+                      "name": "хлеб",
+                      "quantity": 5,
+                      "price": 50.0
+                    }
+                  ]
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+              - name: Authorization
+                value: Bearer {{ _.token }}
+                description: ""
+                disabled: false
+            scripts:
+              afterResponse: >-
+                insomnia.test('Статус код должен быть 201 (Created)', () => {
+                  insomnia.expect(insomnia.response.code).to.equal(201);
+                });
+
+
+                if (insomnia.response.body) {
+                  const responseBody = JSON.parse(insomnia.response.body);
+                  const orderId = responseBody.orderId || responseBody.id;
+
+                  insomnia.test('Заказ создан: есть id', () => {
+                    insomnia.expect(orderId).to.not.be.undefined;
+                    insomnia.expect(orderId).to.not.be.null;
+                  });
+
+                  insomnia.test('У заказа есть статус', () => {
+                    insomnia.expect(responseBody.status).to.be.a('string');
+                  });
+
+                  if (orderId) {
+                    insomnia.environment.set('orderId', String(orderId));
+                  }
+
+                  const token = insomnia.environment.get('token');
+                  const baseUrl = insomnia.environment.get('base_url');
+
+                  if (orderId && token) {
+                    insomnia.sendRequest({
+                      url: `${baseUrl}/api/orders/${orderId}`,
+                      method: 'GET',
+                      headers: {
+                        Authorization: `Bearer ${token}`
+                      }
+                    }, function (err, ans) {
+                      insomnia.test('GET order by id должен вернуть 200', () => {
+                        insomnia.expect(ans.code).to.equal(200);
+                      });
+
+                      if (ans && ans.body) {
+                        const orderResponse = JSON.parse(ans.body);
+                        const gotId = orderResponse.orderId || orderResponse.id;
+
+                        insomnia.test('GET order возвращает тот же id', () => {
+                          insomnia.expect(String(gotId)).to.equal(String(orderId));
+                        });
+                      }
+                    });
+                  }
+                } else {
+                  insomnia.test('Тело ответа пустое', () => {
+                    insomnia.expect.fail('Response body отсутствует');
+                  });
+                }
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{ _.base_url }}/api/orders"
+            name: Negative - Create Order Invalid Token
+            meta:
+              id: req_f9e72913138c412a8b1edc62830b6bce
+              created: 1788720075866
+              modified: 1788721086989
+              isPrivate: false
+              description: ""
+              sortKey: -1788720075866
+            method: POST
+            body:
+              mimeType: application/json
+              text: |-
+                {
+                  "restaurantId": 1111,
+                  "deliveryAddress": "Lenina 222, Omsk",
+                  "items": [
+                    {
+                      "menuItemId": 11,
+                      "name": "хлеб",
+                      "quantity": 1,
+                      "price": 60.0
+                    }
+                  ]
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+              - name: Authorization
+                value: Bearer invalid_jwt_token_5908588
+                description: ""
+                disabled: false
+            scripts:
+              afterResponse: >-
+                insomnia.test('Статус код должен быть 401 (Unauthorized)', () =>
+                {
+                  insomnia.expect(insomnia.response.code).to.equal(401);
+                });
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{ _.base_url }}/api/orders"
+            name: Negative - Create Order Without Token
+            meta:
+              id: req_d1824ef397ae4d77af6365d659bfb6c9
+              created: 1788721056483
+              modified: 1788721332681
+              isPrivate: false
+              description: ""
+              sortKey: -1788721056483
+            method: POST
+            body:
+              mimeType: application/json
+              text: |-
+                {
+                  "restaurantId": 1134,
+                  "deliveryAddress": "Lenina 22, Omsk",
+                  "items": [
+                    {
+                      "menuItemId": 11,
+                      "name": "молоко",
+                      "quantity": 4,
+                      "price": 130.0
+                    }
+                  ]
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+            scripts:
+              afterResponse: >-
+                insomnia.test('Статус код должен быть 400 (Bad Request)', () =>
+                {
+                  insomnia.expect(insomnia.response.code).to.equal(400);
+                });
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{ _.base_url }}/api/orders"
+            name: Negative - Create Order Empty Items
+            meta:
+              id: req_f16059650f2647139f4c1549f5b1738d
+              created: 1788721282007
+              modified: 1788721344923
+              isPrivate: false
+              description: ""
+              sortKey: -1788721282007
+            method: POST
+            body:
+              mimeType: application/json
+              text: |-
+                {
+                  "restaurantId": 11334,
+                  "deliveryAddress": "Lenina 22, Moscow",
+                  "items": []
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+            scripts:
+              afterResponse: >-
+                insomnia.test('Статус код должен быть 400 (Bad Request)', () =>
+                {
+                  insomnia.expect(insomnia.response.code).to.equal(400);
+                });
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+      - name: Get Order By ID
+        meta:
+          id: fld_e8ae068a27134b75ae94b7cffde07047
+          created: 1788693758720
+          modified: 1788721462330
+          sortKey: -1788693758720
+          description: ""
+        children:
+          - url: "{{ _.base_url }}/api/orders/{{ _.orderId }}"
+            name: Positive - Get Order By ID
+            meta:
+              id: req_34fbaa9660a3402aa291c951d78a4e58
+              created: 1788693802815
+              modified: 1788721444840
+              isPrivate: false
+              description: ""
+              sortKey: -1788693802815
+            method: GET
+            headers:
+              - name: Authorization
+                value: Bearer {{ _.token }}
+                description: ""
+                disabled: false
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{ _.base_url }}/api/orders/26666699999999"
+            name: Negative - Get Non-Existent Order
+            meta:
+              id: req_8e3a280ad23b4eeca8019c505857e83e
+              created: 1788720794618
+              modified: 1788721474775
+              isPrivate: false
+              description: ""
+              sortKey: -1788720794618
+            method: GET
+            headers:
+              - name: Authorization
+                value: Bearer {{ _.token }}
+                description: ""
+                disabled: false
+            scripts:
+              afterResponse: |-
+                insomnia.test('Статус код 404 должен быть (Not Found)', () => {
+                  insomnia.expect(insomnia.response.code).to.equal(404);
+                });
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+  - name: Camunda Tasks
+    meta:
+      id: fld_137b078dec3f4435a7a4c572ffed070c
+      created: 1788690433403
+      modified: 1788721794955
+      sortKey: -1788690128248
+      description: ""
+    children:
+      - name: Get Tasks
+        meta:
+          id: fld_79970b86aa484b75aa3f2ac5e9696040
+          created: 1788695122854
+          modified: 1788721794955
+          sortKey: -1788695122854
+          description: ""
+        children:
+          - url: "{{ _.kitchen_url }}/api/tasks/group/ROLE_COURIER"
+            name: Positive - Get Courier Tasks
+            meta:
+              id: req_fa9abab98bf547ad81fbdc7e631d20dd
+              created: 1788695146979
+              modified: 1788721671776
+              isPrivate: false
+              description: ""
+              sortKey: -1788695147079
+            method: GET
+            scripts:
+              afterResponse: >-
+                insomnia.test('Статус должен быть 200', () => {
+                  insomnia.expect(insomnia.response.code).to.equal(200);
+                });
+
+
+                if (insomnia.response.body) {
+                  const tasks = JSON.parse(insomnia.response.body);
+
+                  if (Array.isArray(tasks) && tasks.length > 0 && tasks[0].taskId) {
+                    insomnia.environment.set('taskId', tasks[0].taskId);
+                  }
+                }
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{ _.kitchen_url }}/api/tasks/group/ROLE_RESTAURANT"
+            name: Positive - Get Restaurant Tasks
+            meta:
+              id: req_4a1f02166370497b89442ba3e27a4cb5
+              created: 1788695159206
+              modified: 1788721694971
+              isPrivate: false
+              description: ""
+              sortKey: -1788695147179
+            method: GET
+            scripts:
+              afterResponse: >-
+                insomnia.test('Статус 200', () => {
+                  insomnia.expect(insomnia.response.code).to.equal(200);
+                });
+
+
+                if (insomnia.response.body) {
+                  const tasks = JSON.parse(insomnia.response.body);
+
+                  if (Array.isArray(tasks) && tasks.length > 0 && tasks[0].taskId) {
+                    insomnia.environment.set('taskId', tasks[0].taskId);
+                  }
+                }
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{ _.kitchen_url }}/api/tasks/group/ROLE_UNKNOWN"
+            name: Negative - Get Tasks Unknown Role
+            meta:
+              id: req_84f30f363735498c9eaf8daf70e8c529
+              created: 1788721683973
+              modified: 1788721793702
+              isPrivate: false
+              description: ""
+              sortKey: -1788721683973
+            method: GET
+            scripts:
+              afterResponse: |-
+                insomnia.test('Возвращает пустой массив', () => {
+                  insomnia.expect(insomnia.response.code).to.equal(200);
+                  const body = JSON.parse(insomnia.response.body);
+                  insomnia.expect(body).to.be.an('array').that.is.empty;
+                });
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+      - name: Complete Task
+        meta:
+          id: fld_8a48c85de94e4615adc581f4c97238e8
+          created: 1788695129936
+          modified: 1788721618213
+          sortKey: -1788695129936
+          description: ""
+        children:
+          - url: "{{ _.kitchen_url }}/api/tasks/{{ _.taskId }}/complete"
+            name: Positive - Complete Task
+            meta:
+              id: req_a31b044733d7411f8eead1514aee5be8
+              created: 1788695134669
+              modified: 1788721525086
+              isPrivate: false
+              description: ""
+              sortKey: -1788695134669
+            method: POST
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{ _.kitchen_url }}/api/tasks/uui*uhgfffffh56h/complete"
+            name: Negative - Complete Task Non-Existent ID
+            meta:
+              id: req_1594bb29c89e418089634bd9afccd0d4
+              created: 1788721520469
+              modified: 1788721617046
+              isPrivate: false
+              description: ""
+              sortKey: -1788721520469
+            method: POST
+            scripts:
+              afterResponse: |-
+                insomnia.test('Статус должен быть 404', () => {
+                  insomnia.expect(insomnia.response.code).to.equal(404);
+                });
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+cookieJar:
+  name: Default Jar
+  meta:
+    id: jar_8261c4ef36376d10d8b284b0d9be573404052ed3
+    created: 1788626298304
+    modified: 1788721794952
+environments:
+  name: Base Environment
+  meta:
+    id: env_8261c4ef36376d10d8b284b0d9be573404052ed3
+    created: 1788626298302
+    modified: 1788721794953
+    isPrivate: false
+  data:
+    base_url: http://localhost:8081
+    kitchen_url: http://localhost:8084
+    username: user_1788721032394_3318
+    password: pass_64928
+    token: eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJ1c2VyXzE3ODg3MTk2NTc3NTZfODg2NiIsInJvbGVzIjoiUk9MRV9DVVNUT01FUiIsImlhdCI6MTc4ODcxOTgxOSwiZXhwIjoxNzg4ODA2MjE5fQ.kWkEOKLyT45zV3XUgguts_VLF_c5pni8ngejZxZpxo6M-96nhB28ZvimHziLLd2D
+    orderId: "16"
+    taskId: b0be3226-a9e7-11f1-9bd8-bccd99e9869d
+    registerUsername: user_1788721032394_3318
+    nonExistentUsername: non_existent_1788719866477_1890
+    randomPassword: pass_441239

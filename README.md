@@ -95,3 +95,33 @@
 - `POST /api/orders (с токеном)`
 - `GET /api/orders/{id}`
 
+## Инструкция по запуску
+1) Запуск инфраструктуры (базы данных, Kafka, ...)
+```bash
+docker-compose up -d
+```
+2) Сборка и запуск проекта осуществляется через `Gradle Wrapper`
+- `api-gateway` (http://localhost:8081)
+
+```bash
+./gradlew :api-gateway:bootRun
+```
+
+- `order-service` (http://localhost:8082)
+```bash
+./gradlew :order-service:bootRun
+```
+
+- payment-service (http://localhost:8083)
+```bash
+./gradlew :payment-service:bootRun
+```
+
+- kitchen-delivery-service (http://localhost:8084)
+```bash
+./gradlew :kitchen-delivery-service:bootRun
+```
+
+## Тестирование API через Insomnia
+В репозиторий включена коллекция автотестов для Insomnia, включающая в себя проверку основных сценариев использования
+
