@@ -1,0 +1,42 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: kitchen-delivery-service
+  datasource:
+    url: jdbc:postgresql://localhost:5543/kitchen_db
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: kitchen-delivery-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+camunda.bpm:
+  webapp:
+    auth:
+      enabled: true
+  generic-properties:
+    properties:
+      historyTimeToLive: P180D
+  admin-user:
+    id: admin
+    password: admin
+    firstName: Admin
+    lastName: Admin
+    email: admin@localhost
+  filter:
+    create: All tasks
+  auto-deployment-enabled: true
+  deployment-resource-pattern: processes/*.bpmn
